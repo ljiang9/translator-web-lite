@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>translator-web-lite · 词典翻译</title>
+<style>
+  body { font-family:-apple-system,"PingFang SC",sans-serif; background:#f5f6f8; margin:0; padding:24px; color:#1f2329; }
+  h1 { font-size:20px; }
+  textarea { width:100%; height:90px; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:15px; }
+  button { background:#2f6fed; color:#fff; border:none; border-radius:8px; padding:9px 18px; font-size:14px; cursor:pointer; margin-top:8px; }
+  #out { background:#fff; border:1px solid #e2e5ea; border-radius:10px; padding:12px; margin-top:12px; font-size:15px; min-height:40px; }
+  .cfg { margin:8px 0; }
+  .cfg input { padding:7px; border:1px solid #ccc; border-radius:6px; }
+</style>
+</head>
+<body>
+  <h1>中英词典翻译</h1>
+  <div class="cfg">
+    <input id="key" placeholder="可选：API key（留空走词典）" type="password">
+  </div>
+  <textarea id="src" placeholder="输入英文或中文，例如：I love apple"></textarea>
+  <button onclick="run()">翻译</button>
+  <div id="out"></div>
+
+<!-- TRANS_LOGIC_BEGIN -->
+<script>
+// ===== 纯函数：词典翻译（Node 断言）=====
+const DICT = {
+  "i":"我", "love":"爱", "like":"喜欢", "apple":"苹果", "book":"书",
+  "cat":"猫", "dog":"狗", "hello":"你好", "world":"世界", "good":"好",
+  "我":"I", "爱":"love", "喜欢":"like", "苹果":"apple", "书":"book",
+  "猫":"cat", "狗":"dog", "你好":"hello", "世界":"world", "好":"good"
+};
+
+function translate(text) {
+  // 词典逐词/逐词替换；未命中保留原词并标记。
+  const tokens = text.toLowerCase().split(/(\s+)/);
+  return tokens.map(tok => {
+    const trimmed = tok.trim();
+    if (!trimmed) return tok;
+    if (DICT[trimmed] !== undefined) return DICT[trimmed];
+    return tok; // 未命中保留
+  }).join("");
+}
+// ===== TRANS_LOGIC_END =====
+
+async function run() {
+  const text = document.getElementById("src").value.trim();
+  let out = translate(text);
+  const key = document.getElementById("key").value.trim();
+  if (key) {
+    out += "\n（已配置 key，可接 LLM 进一步润色；此处先用词典结果。）";
+  }
+  document.getElementById("out").textContent = out;
+}
+</script>
+</body>
+</html>
